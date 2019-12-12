@@ -13,7 +13,10 @@ let inputString = String(data: inputData, encoding: .utf8)!
 var parser = StringsParser()
 parser.parse(input: inputString)
 
-let code = makeSwiftUICode(strings: parser.collection)
+let code = "/* Generated using OWOWGenerate. Do not edit. */\n"
+    + makeSwiftUICode(strings: parser.collection)
+    + "\n"
+    + makeLocalizedStringCode(strings: parser.collection)
 
 let outputPath = arguments[2]
 
