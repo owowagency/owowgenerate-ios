@@ -15,4 +15,11 @@ parser.parse(input: inputString)
 
 let code = makeSwiftUICode(strings: parser.collection)
 
-try! code.write(toFile: arguments[2], atomically: true, encoding: .utf8)
+let outputPath = arguments[2]
+
+if let existingCodeData = try? Data(contentsOf: URL(fileURLWithPath: outputPath)), let existingCode = String(data: existingCodeData, encoding: .utf8), existingCode == code {
+    print("No change needed in code; not overwriting output")
+    exit(0)
+}
+
+try! code.write(toFile: outputPath, atomically: true, encoding: .utf8)
