@@ -10,11 +10,12 @@ struct Task: Decodable {
     enum TaskType: String, Codable {
         case generateSwiftUIMapping
         case generateNSLocalizedStringMapping
+        case rewriteTranslationFiles
     }
     
     /// The task type.
     var type: TaskType
     
     /// The output file of the task.
-    var output: String
+    var output: String?
 }

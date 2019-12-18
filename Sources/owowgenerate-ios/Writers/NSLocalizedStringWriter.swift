@@ -27,6 +27,6 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         
         let variableName = (key.key.split(separator: ".").last ?? "").camelCase(delimiter: "-", upper: false)
         
-        writer.addLine("static var \(variableName): String { NSLocalizedString(\"\(key.key)\", comment: \(writer.makeStringLiteral(key.comment))) }")
+        writer.addLine("static var \(variableName): String { NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))) }")
     }
 }

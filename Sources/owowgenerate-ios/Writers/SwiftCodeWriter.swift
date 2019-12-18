@@ -38,7 +38,7 @@ struct SwiftCodeWriter {
         }
     }
     
-    func makeStringLiteral(_ text: String) -> String {
+    static func makeStringLiteral(_ text: String) -> String {
         "\"\(text.replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "\n", with: "\\n"))\""
     }
 }

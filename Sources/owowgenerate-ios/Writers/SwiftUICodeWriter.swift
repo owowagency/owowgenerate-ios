@@ -31,7 +31,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         
         let additionalArguments: String
         if !key.comment.isEmpty {
-            additionalArguments = ", comment: \(writer.makeStringLiteral(key.comment))"
+            additionalArguments = ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
         } else {
             additionalArguments = ""
         }
