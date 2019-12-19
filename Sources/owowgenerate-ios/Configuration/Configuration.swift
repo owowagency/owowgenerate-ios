@@ -3,6 +3,7 @@ struct Configuration: Decodable {
     /// The first file in this array serves as "master" file.
     var stringsFiles: [String]
     
+    /// Tasks to execute when running `owowgenerate`.
     var tasks: [Task]
 }
 
