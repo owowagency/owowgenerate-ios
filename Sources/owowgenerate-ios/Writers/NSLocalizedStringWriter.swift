@@ -1,6 +1,8 @@
 func makeLocalizedStringCode(strings: StringsCollection) -> String {
     var writer = SwiftCodeWriter()
     
+    writer.addLine("import Foundation")
+    
     writer.inBlock("enum Strings") { writer in
         writeStrings(strings: strings, writer: &writer)
     }
