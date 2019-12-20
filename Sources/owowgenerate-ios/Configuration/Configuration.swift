@@ -5,6 +5,23 @@ struct Configuration: Decodable {
     
     /// Tasks to execute when running `owowgenerate`.
     var tasks: [Task]
+    
+    var inputFiles: Set<String> {
+        return Set(stringsFiles)
+    }
+    
+    var outputFiles: Set<String> {
+        return Set(tasks.compactMap { task -> [String]? in
+            switch task.type {
+            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping:
+                return task.output.map { [$0] }
+            case .rewriteTranslationFiles:
+                return Array(stringsFiles.suffix(from: 1))
+            case .generateInputXcFileList, .generateOutputXcFileList:
+                return nil
+            }
+        }.reduce([], +))
+    }
 }
 
 struct Task: Decodable {
@@ -12,6 +29,8 @@ struct Task: Decodable {
         case generateSwiftUIMapping
         case generateNSLocalizedStringMapping
         case rewriteTranslationFiles
+        case generateInputXcFileList
+        case generateOutputXcFileList
     }
     
     /// The task type.

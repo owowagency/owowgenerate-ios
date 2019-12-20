@@ -16,20 +16,21 @@ let inputFilePath = config.stringsFiles[0]
 let strings = StringsParser.parse(inputPath: inputFilePath)
 
 for task in config.tasks {
-    let code: String
+    let output: String
     
     switch task.type {
     case .generateSwiftUIMapping:
-        code = makeSwiftUICode(strings: strings)
+        output = makeSwiftUICode(strings: strings)
     case .generateNSLocalizedStringMapping:
-        code = makeLocalizedStringCode(strings: strings)
+        output = makeLocalizedStringCode(strings: strings)
     case .rewriteTranslationFiles:
         rewriteTranslationFiles(paths: config.stringsFiles)
         continue
+    case .generateInputXcFileList:
+        output = config.inputFiles.subtracting(config.outputFiles).sorted().joined(separator: "\n")
+    case .generateOutputXcFileList:
+        output = config.outputFiles.sorted().joined(separator: "\n")
     }
-    
-    let output = "/* Generated using OWOWGenerate. Do not edit. */\n"
-        + code
     
     guard let outputPath = task.output else {
         preconditionFailure("Task \(task.type) requires output path.")
