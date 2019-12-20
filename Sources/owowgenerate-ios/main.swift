@@ -5,8 +5,7 @@ import Foundation
 
 // TODO: Xcode warnings when strings are missing in a translation file or are not present in the main translation file.
 
-let configData = try! Data(contentsOf: URL(fileURLWithPath: "owowgenerate.json"))
-let config = try! JSONDecoder().decode(Configuration.self, from: configData)
+let config = Configuration.load()
 
 precondition(!config.stringsFiles.isEmpty, "At least one input strings file is required.")
 precondition(!config.tasks.isEmpty, "At least one task is required.")
@@ -24,7 +23,7 @@ for task in config.tasks {
     case .generateNSLocalizedStringMapping:
         output = makeLocalizedStringCode(strings: strings)
     case .rewriteTranslationFiles:
-        rewriteTranslationFiles(paths: config.stringsFiles)
+        try! rewriteTranslationFiles(paths: config.stringsFiles)
         continue
     case .generateInputXcFileList:
         output = config.inputFiles.subtracting(config.outputFiles).sorted().joined(separator: "\n")
@@ -38,10 +37,5 @@ for task in config.tasks {
     
     let outputURL = URL(fileURLWithPath: outputPath)
     
-    if let existingCodeData = try? Data(contentsOf: outputURL), let existingCode = String(data: existingCodeData, encoding: .utf8), existingCode == output {
-        /// Don't overwrite the file if not changed.
-        continue
-    }
-    
-    try! output.write(to: outputURL, atomically: true, encoding: .utf8)
+    try! output.writeIfNeeded(to: outputURL)
 }

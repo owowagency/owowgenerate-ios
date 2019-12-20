@@ -1,6 +1,6 @@
 import Foundation
 
-func rewriteTranslationFiles(paths: [String]) {
+func rewriteTranslationFiles(paths: [String]) throws {
     let primaryFilePath = paths.first!
     let nonPrimaryFilePaths = paths[1..<paths.endIndex]
     
@@ -78,6 +78,6 @@ func rewriteTranslationFiles(paths: [String]) {
     }
     
     for file in nonPrimaryFiles {
-        try! file.output.write(to: file.url, atomically: true, encoding: .utf8)
+        try file.output.writeIfNeeded(to: file.url)
     }
 }

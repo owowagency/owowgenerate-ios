@@ -1,3 +1,5 @@
+import Foundation
+
 struct Configuration: Decodable {
     /// A list of input file paths of localizable strings files.
     /// The first file in this array serves as "master" file.
@@ -21,6 +23,15 @@ struct Configuration: Decodable {
                 return nil
             }
         }.reduce([], +))
+    }
+    
+    static func load() -> Configuration {
+        do {
+            let configData = try Data(contentsOf: URL(fileURLWithPath: "owowgenerate.json"))
+            return try JSONDecoder().decode(Configuration.self, from: configData)
+        } catch {
+            fatalError("Couldn't load owowgenerate.json: \(error)")
+        }
     }
 }
 
