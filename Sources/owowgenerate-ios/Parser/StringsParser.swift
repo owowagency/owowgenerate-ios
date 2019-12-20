@@ -71,6 +71,9 @@ struct StringsEntry {
     
     /// The line number in `file` of this entry.
     var line: Int
+    
+    /// Any placeholders in the string, like `%@`.
+    var placeholders: [PlaceholderType]
 }
 
 /// A type that parses a Strings file.
@@ -124,10 +127,11 @@ struct StringsParser {
             let keyStringLiteral = line[range]
             let keyString = String(keyStringLiteral.dropFirst().dropLast())
             let value = pairs[keyString]
+            let placeholders = try! PlaceholderType.placeholders(fromFormat: value ?? "")
             
             assert(value != nil)
             
-            let entry = StringsEntry(key: keyString, comment: comment, value: value, file: file, line: lineNumber)
+            let entry = StringsEntry(key: keyString, comment: comment, value: value, file: file, line: lineNumber, placeholders: placeholders)
             comment = ""
             
             storeEntry(entry)

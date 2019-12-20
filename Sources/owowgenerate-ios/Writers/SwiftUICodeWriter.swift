@@ -27,15 +27,29 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
     for key in strings.keys {
         writer.addDocComment(key.comment)
         
-        let variableName = (key.key.split(separator: ".").last ?? "").camelCase(delimiter: "-", upper: false)
+        let memberName = (key.key.split(separator: ".").last ?? "").camelCase(delimiter: "-", upper: false)
         
-        let additionalArguments: String
-        if !key.comment.isEmpty {
-            additionalArguments = ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
+        if key.placeholders.isEmpty {
+            let additionalArguments: String
+            if !key.comment.isEmpty {
+                additionalArguments = ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
+            } else {
+                additionalArguments = ""
+            }
+            
+            writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
         } else {
-            additionalArguments = ""
+            let parameters = key.placeholders.enumerated().map { index, type in
+                "_ placeholder\(index): \(type.rawValue)"
+            }.joined(separator: ", ")
+            
+            let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
+            
+            writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
+                writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
+                writer.addLine("let string = String(format: format, \(parameterUsage))")
+                writer.addLine("return Text(verbatim: string)")
+            }
         }
-        
-        writer.addLine("static var \(variableName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
     }
 }
