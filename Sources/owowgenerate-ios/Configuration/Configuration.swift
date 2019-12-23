@@ -15,6 +15,8 @@ struct Configuration: Decodable {
     var outputFiles: Set<String> {
         return Set(tasks.compactMap { task -> [String]? in
             switch task.type {
+            case .generateAndroidStringResources:
+                return []
             case .generateSwiftUIMapping, .generateNSLocalizedStringMapping:
                 return task.output.map { [$0] }
             case .rewriteTranslationFiles:
@@ -42,6 +44,7 @@ struct Task: Decodable {
         case rewriteTranslationFiles
         case generateInputXcFileList
         case generateOutputXcFileList
+        case generateAndroidStringResources
     }
     
     /// The task type.

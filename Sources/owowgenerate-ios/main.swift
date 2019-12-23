@@ -25,6 +25,11 @@ for task in config.tasks {
     case .rewriteTranslationFiles:
         try! rewriteTranslationFiles(paths: config.stringsFiles)
         continue
+    case .generateAndroidStringResources:
+        var writer = AndroidStringResourceWriter(strings: strings)
+        let sources = writer.createResources()
+        output = sources.first?.xmlString ?? ""
+        print(output)
     case .generateInputXcFileList:
         output = config.inputFiles.subtracting(config.outputFiles).sorted().joined(separator: "\n")
     case .generateOutputXcFileList:
