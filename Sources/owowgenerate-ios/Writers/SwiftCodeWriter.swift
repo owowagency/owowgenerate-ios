@@ -42,3 +42,13 @@ struct SwiftCodeWriter {
         "\"\(text.replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "\n", with: "\\n"))\""
     }
 }
+
+extension String {
+    var swiftIdentifier: String {
+        if self == "Type" {
+            return "`Type`"
+        } else {
+            return self
+        }
+    }
+}

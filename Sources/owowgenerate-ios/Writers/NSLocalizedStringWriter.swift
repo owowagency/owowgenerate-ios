@@ -15,7 +15,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         writer.addLine()
         
         let variableName = name.camelCase(delimiter: "-", upper: false)
-        let typeName = name.camelCase(delimiter: "-", upper: true)
+        let typeName = (name.camelCase(delimiter: "-", upper: true)).swiftIdentifier
         
         writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
