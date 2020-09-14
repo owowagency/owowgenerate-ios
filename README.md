@@ -1,9 +1,5 @@
 # owowgenerate-ios
 
-## ⚠️ Work in progress
-
-This tool is still a work in progress. API, features, and logic will change a lot.
-
 ## 🧐 Readme
 
 A tool, written in Swift, that parses iOS `Localizable.strings` files.
