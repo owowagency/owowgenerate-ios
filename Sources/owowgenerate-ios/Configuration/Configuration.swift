@@ -25,12 +25,12 @@ struct Configuration: Decodable {
         }.reduce([], +))
     }
     
-    static func load() -> Configuration {
+    static func load(from filename: String) -> Configuration {
         do {
-            let configData = try Data(contentsOf: URL(fileURLWithPath: "owowgenerate.json"))
+            let configData = try Data(contentsOf: URL(fileURLWithPath: filename))
             return try JSONDecoder().decode(Configuration.self, from: configData)
         } catch {
-            fatalError("Couldn't load owowgenerate.json: \(error)")
+            fatalError("Couldn't load \(filename): \(error)")
         }
     }
 }

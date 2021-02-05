@@ -3,9 +3,11 @@ import Foundation
 // TODO: Generate an extension on LocalizedStringKey
 //       Maybe that can be used like Text(.myString) instead of Text extensions.
 
-// TODO: Xcode warnings when strings are missing in a translation file or are not present in the main translation file.
+let arguments = ProcessInfo.processInfo.arguments
+let defaultConfigFilename = "owowgenerate.json"
+let configFilename = arguments.count > 1 ? arguments.last! : defaultConfigFilename
 
-let config = Configuration.load()
+let config = Configuration.load(from: configFilename)
 
 precondition(!config.stringsFiles.isEmpty, "At least one input strings file is required.")
 precondition(!config.tasks.isEmpty, "At least one task is required.")
