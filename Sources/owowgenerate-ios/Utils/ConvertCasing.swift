@@ -9,7 +9,7 @@ extension StringProtocol {
                 return element.element.capitalized
             }.reduce("", +)
         } else {
-            return self
+            return String(self)
         }
     }
 }
