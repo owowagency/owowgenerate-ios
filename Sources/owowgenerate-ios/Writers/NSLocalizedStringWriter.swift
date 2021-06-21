@@ -14,8 +14,8 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
-        let variableName = name.camelCase(delimiter: "-", upper: false)
-        let typeName = (name.camelCase(delimiter: "-", upper: true)).swiftIdentifier
+        let variableName = name.camelCase(from: config.caseStyle, upper: false)
+        let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
         writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
@@ -27,7 +27,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
     for key in strings.keys {
         writer.addDocComment(key.comment)
         
-        let memberName = (key.key.split(separator: ".").last ?? "").camelCase(delimiter: "-", upper: false)
+        let memberName = (key.key.split(separator: ".").last ?? "").camelCase(from: config.caseStyle, upper: false)
         let getLocalizedString = "NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))"
         
         if key.placeholders.isEmpty {

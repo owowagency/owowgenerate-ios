@@ -34,4 +34,3 @@ See [Configuration.swift](Sources/owowgenerate-ios/Configuration/Configuration.s
 - Generate a SwiftUI `Text` extension for typesafe access to strings. Comments are also copied into the `Text` init and generated properties.
 - Generate other (`NSLocalizedString`) extensions for typesafe access to strings. Comments are also copied into the `NSLocalizedString` call.
 - Rewrite secondary translation files, copying comments and general structure from the primary file.
-- [WIP] Generate Android strings files (XML) from the iOS files

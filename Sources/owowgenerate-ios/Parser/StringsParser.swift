@@ -172,7 +172,7 @@ struct StringsParser {
         /// - For context with the values (comments etc), we use our own parser.
         let inputData = try! Data(contentsOf: URL(fileURLWithPath: inputPath))
         let parsedDictionary = try! PropertyListDecoder().decode([String: String].self, from: inputData)
-        let input = String(data: inputData, encoding: .utf8)!
+        let input = String(data: inputData, encoding: .utf8) ?? String(data: inputData, encoding: .utf16)!
         
         self.comment = ""
         

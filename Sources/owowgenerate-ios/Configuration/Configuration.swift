@@ -8,6 +8,13 @@ struct Configuration: Decodable {
     /// Tasks to execute when running `owowgenerate`.
     var tasks: [Task]
     
+    /// The case style that the strings files are keyed with.
+    private var inputCaseStyle: CaseStyle?
+    
+    var caseStyle: CaseStyle {
+        inputCaseStyle ?? .kebabCase
+    }
+    
     var inputFiles: Set<String> {
         return Set(stringsFiles)
     }
@@ -49,4 +56,18 @@ struct Task: Decodable {
     
     /// The output file of the task.
     var output: String?
+}
+
+enum CaseStyle: String, Codable {
+    case camelCase
+    case kebabCase
+    case snakeCase
+    
+    var delimiter: Character? {
+        switch self {
+        case .camelCase: return nil
+        case .kebabCase: return "-"
+        case .snakeCase: return "_"
+        }
+    }
 }

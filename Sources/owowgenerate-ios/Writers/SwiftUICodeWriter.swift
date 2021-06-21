@@ -14,8 +14,8 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
-        let variableName = name.camelCase(delimiter: "-", upper: false)
-        let typeName = (name.camelCase(delimiter: "-", upper: false) + "StringsNamespace").swiftIdentifier
+        let variableName = name.camelCase(from: config.caseStyle, upper: false)
+        let typeName = (name.camelCase(from: config.caseStyle, upper: false) + "StringsNamespace").swiftIdentifier
         
         writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
@@ -25,7 +25,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
     }
     
     for key in strings.keys {
-        let memberName = (key.key.split(separator: ".").last ?? "").camelCase(delimiter: "-", upper: false)
+        let memberName = (key.key.split(separator: ".").last ?? "").camelCase(from: config.caseStyle, upper: false)
         
         if key.placeholders.isEmpty {
             let additionalArguments: String
