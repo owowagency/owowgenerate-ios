@@ -15,7 +15,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         writer.addLine()
         
         let variableName = name.camelCase(from: config.caseStyle, upper: false)
-        let typeName = (name.camelCase(from: config.caseStyle, upper: false) + "StringsNamespace").swiftIdentifier
+        let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
         writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
