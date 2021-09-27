@@ -19,7 +19,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         
         writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
-        writer.inBlock("struct \(typeName)") { writer in
+        writer.inBlock("public struct \(typeName)") { writer in
             writeStrings(strings: collection, writer: &writer)
         }
     }
