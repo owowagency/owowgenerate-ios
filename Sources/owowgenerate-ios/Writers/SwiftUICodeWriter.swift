@@ -3,7 +3,7 @@ func makeSwiftUICode(strings: StringsCollection) -> String {
     writer.addLine("import SwiftUI")
     writer.addLine()
     
-    writer.inBlock("extension SwiftUI.Text") { writer in
+    writer.inBlock("public extension SwiftUI.Text") { writer in
         writeStrings(strings: strings, writer: &writer)
     }
     
@@ -17,9 +17,9 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
-        writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
+        writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
         
-        writer.inBlock("struct \(typeName)") { writer in
+        writer.inBlock("public struct \(typeName)") { writer in
             writeStrings(strings: collection, writer: &writer)
         }
     }
@@ -36,7 +36,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             }
             
             writer.addDocComment(key.comment)
-            writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            writer.addLine("public static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -45,7 +45,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
             writer.addDocComment(key.comment)
-            writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
+            writer.inBlock("public static func \(memberName)(\(parameters)) -> Text") { writer in
                 writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
                 writer.addLine("let string = String(format: format, \(parameterUsage))")
                 writer.addLine("return Text(verbatim: string)")

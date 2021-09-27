@@ -3,7 +3,7 @@ func makeLocalizedStringCode(strings: StringsCollection) -> String {
     
     writer.addLine("import Foundation")
     
-    writer.inBlock("enum Strings") { writer in
+    writer.inBlock("public enum Strings") { writer in
         writeStrings(strings: strings, writer: &writer)
     }
     
@@ -17,9 +17,9 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
-        writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
+        writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
         
-        writer.inBlock("struct \(typeName)") { writer in
+        writer.inBlock("public struct \(typeName)") { writer in
             writeStrings(strings: collection, writer: &writer)
         }
     }
@@ -31,7 +31,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let getLocalizedString = "NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))"
         
         if key.placeholders.isEmpty {
-            writer.addLine("static var \(memberName): String { \(getLocalizedString) }")
+            writer.addLine("public static var \(memberName): String { \(getLocalizedString) }")
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -39,7 +39,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
             
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
-            writer.inBlock("static func \(memberName)(\(parameters)) -> String") { writer in
+            writer.inBlock("public static func \(memberName)(\(parameters)) -> String") { writer in
                 writer.addLine("let format = \(getLocalizedString)")
                 writer.addLine("return String(format: format, \(parameterUsage))")
             }
