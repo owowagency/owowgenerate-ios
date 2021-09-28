@@ -6,10 +6,10 @@ func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> 
     }
     
     var writer = SwiftCodeWriter()
-    
     writer.addLine("import Foundation")
+    writer.addLine()
     
-    var extensionText = (isConstructingForLibrary ? "public " : "") + "enum Strings"
+    let extensionText = (isConstructingForLibrary ? "public " : "") + "enum Strings"
     
     writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
@@ -25,8 +25,8 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
-        var line = (isConstructingForLibrary ? "public " : "") + "static var \(variableName): \(typeName).Type { \(typeName).self }"
-        var structBlock = (isConstructingForLibrary ? "public " : "") + "struct \(typeName)"
+        let line = (isConstructingForLibrary ? "public " : "") + "static var \(variableName): \(typeName).Type { \(typeName).self }"
+        let structBlock = (isConstructingForLibrary ? "public " : "") + "struct \(typeName)"
         
         writer.addLine(line)
         writer.inBlock(structBlock) { writer in
