@@ -1,5 +1,5 @@
 func makeSwiftUICode(strings: StringsCollection) -> String {
-    writerTestVariable = 0
+    shouldBePublic = false
     var writer = SwiftCodeWriter()
     writer.addLine("import SwiftUI")
     writer.addLine()
@@ -10,25 +10,26 @@ func makeSwiftUICode(strings: StringsCollection) -> String {
     
     return writer.output
 }
-var writerTestVariable = 0
+var shouldBePublic = false
 fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter) {
-    writerTestVariable = writerTestVariable + 1
+    
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
-        if writerTestVariable == 0 {
-            writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
-            
-            writer.inBlock("struct \(typeName)") { writer in
-                writeStrings(strings: collection, writer: &writer)
-            }
-        } else {
+        if shouldBePublic {
             writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
             
             writer.inBlock("public struct \(typeName)") { writer in
+                writeStrings(strings: collection, writer: &writer)
+            }
+        } else {
+            shouldBePublic = true
+            writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
+            
+            writer.inBlock("struct \(typeName)") { writer in
                 writeStrings(strings: collection, writer: &writer)
             }
         }
