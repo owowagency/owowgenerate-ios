@@ -34,11 +34,13 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
                 writeStrings(strings: collection, writer: &writer)
             }
         } else {
+            shouldBePublic = true
             writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
             
             writer.inBlock("struct \(typeName)") { writer in
                 writeStrings(strings: collection, writer: &writer)
             }
+            shouldBePublic = false
         }
     }
     
