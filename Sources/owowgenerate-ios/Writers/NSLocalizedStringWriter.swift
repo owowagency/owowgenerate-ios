@@ -11,7 +11,7 @@ func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> 
     
     writer.addLine("import Foundation")
     
-    var extensionText = isConstructingForLibrary ? "public extension SwiftUI.Text" : "extension SwiftUI.Text"
+    var extensionText = isConstructingForLibrary ? "public enum Strings" : "enum Strings"
     
     writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
