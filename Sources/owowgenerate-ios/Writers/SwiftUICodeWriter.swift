@@ -11,7 +11,7 @@ func makeSwiftUICode(strings: StringsCollection, isForLibrary: Bool) -> String {
     writer.addLine("import SwiftUI")
     writer.addLine()
     
-    var extensionText = isConstructingForLibrary? "public extension SwiftUI.Text" : "extension SwiftUI.Text"
+    var extensionText = isConstructingForLibrary ? "public extension SwiftUI.Text" : "extension SwiftUI.Text"
     
     writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
