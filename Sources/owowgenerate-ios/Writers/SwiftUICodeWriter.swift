@@ -1,5 +1,5 @@
-var shouldBePublic = false
-var isConstructingForLibrary = false
+fileprivate var shouldBePublic = false
+fileprivate var isConstructingForLibrary = false
 
 func makeSwiftUICode(strings: StringsCollection, isForLibrary: Bool) -> String {
     if isForLibrary {
