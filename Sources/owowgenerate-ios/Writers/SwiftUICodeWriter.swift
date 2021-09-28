@@ -11,7 +11,7 @@ func makeSwiftUICode(strings: StringsCollection, isForLibrary: Bool) -> String {
     writer.addLine("import SwiftUI")
     writer.addLine()
     
-    var extensionText = isConstructingForLibrary ? "public extension SwiftUI.Text" : "extension SwiftUI.Text"
+    var extensionText = (isConstructingForLibrary ? "public " : "") + "extension SwiftUI.Text"
     
     writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
@@ -56,12 +56,10 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             }
             
             writer.addDocComment(key.comment)
-            if isConstructingForLibrary {
-                writer.addLine("public static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
-            } else {
-                writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
-            }
-
+            
+            var line = (isConstructingForLibrary ? "public " : "") + "static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }"
+            
+            writer.addLine(line)
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -70,20 +68,14 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
             writer.addDocComment(key.comment)
-            if isConstructingForLibrary {
-                writer.inBlock("public static func \(memberName)(\(parameters)) -> Text") { writer in
-                    writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
-                    writer.addLine("let string = String(format: format, \(parameterUsage))")
-                    writer.addLine("return Text(verbatim: string)")
-                }
-            } else {
-                writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
-                    writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
-                    writer.addLine("let string = String(format: format, \(parameterUsage))")
-                    writer.addLine("return Text(verbatim: string)")
-                }
-            }
             
+            var functionBlock = (isConstructingForLibrary ? "public " :"") + "static func \(memberName)(\(parameters)) -> Text"
+            
+            writer.inBlock(functionBlock) { writer in
+                writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
+                writer.addLine("let string = String(format: format, \(parameterUsage))")
+                writer.addLine("return Text(verbatim: string)")
+                
             if key.placeholders.contains(.object) {
                 // Generate a variant that works with text concatenation
                 writeTextConcatenationFunction(writer: &writer, key: key, memberName: memberName)

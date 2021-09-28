@@ -9,7 +9,7 @@ func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> 
     
     writer.addLine("import Foundation")
     
-    var extensionText = isConstructingForLibrary ? "public enum Strings" : "enum Strings"
+    var extensionText = (isConstructingForLibrary ? "public " : "") + "enum Strings"
     
     writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
@@ -25,18 +25,12 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
-        if isConstructingForLibrary {
-            writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
-            
-            writer.inBlock("public struct \(typeName)") { writer in
-                writeStrings(strings: collection, writer: &writer)
-            }
-        } else {
-            writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
-            
-            writer.inBlock("struct \(typeName)") { writer in
-                writeStrings(strings: collection, writer: &writer)
-            }
+        var line = (isConstructingForLibrary ? "public " : "") + "static var \(variableName): \(typeName).Type { \(typeName).self }"
+        var structBlock = (isConstructingForLibrary ? "public " : "") + "struct \(typeName)"
+        
+        writer.addLine(line)
+        writer.inBlock(structBlock) { writer in
+            writeStrings(strings: collection, writer: &writer)
         }
     }
     
@@ -47,7 +41,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let getLocalizedString = "NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))"
                 
         if key.placeholders.isEmpty {
-            let line = isConstructingForLibrary ? "public static var \(memberName): String { \(getLocalizedString) }" : "static var \(memberName): String { \(getLocalizedString) }"
+            let line = (isConstructingForLibrary ? "public " : "") + "static var \(memberName): String { \(getLocalizedString) }"
             writer.addLine(line)
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
@@ -56,7 +50,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
             
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
-            let functionBlock = isConstructingForLibrary ? "public static func \(memberName)(\(parameters)) -> String" : "static func \(memberName)(\(parameters)) -> String"
+            let functionBlock = (isConstructingForLibrary ? "public " : "") + "static func \(memberName)(\(parameters)) -> String"
             
             writer.inBlock(functionBlock) { writer in
                 writer.addLine("let format = \(getLocalizedString)")
