@@ -1,7 +1,7 @@
 var shouldBePublic = false
 var isConstructingForLibrary = false
 
-func makeLocalizedStringCode(strings: StringsCollection, isForLibrary) -> String {
+func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> String {
     if isForLibrary {
         isConstructingForLibrary = isForLibrary
         shouldBePublic = false
