@@ -1,10 +1,8 @@
-fileprivate var shouldBePublic = false
 fileprivate var isConstructingForLibrary = false
 
 func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> String {
     if isForLibrary {
         isConstructingForLibrary = isForLibrary
-        shouldBePublic = false
     }
     
     var writer = SwiftCodeWriter()
@@ -27,20 +25,18 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
-        if shouldBePublic && isConstructingForLibrary {
+        if isConstructingForLibrary {
             writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
             
             writer.inBlock("public struct \(typeName)") { writer in
                 writeStrings(strings: collection, writer: &writer)
             }
         } else {
-            shouldBePublic = true
             writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
             
             writer.inBlock("struct \(typeName)") { writer in
                 writeStrings(strings: collection, writer: &writer)
             }
-            shouldBePublic = false
         }
     }
     
