@@ -12,7 +12,6 @@ func makeSwiftUICode(strings: StringsCollection) -> String {
 }
 var shouldBePublic = false
 fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter) {
-    
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
@@ -32,6 +31,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             writer.inBlock("struct \(typeName)") { writer in
                 writeStrings(strings: collection, writer: &writer)
             }
+            shouldBePublic = false
         }
     }
     
