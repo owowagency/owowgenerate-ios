@@ -17,9 +17,9 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
-        writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
+        writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
         
-        writer.inBlock("public struct \(typeName)") { writer in
+        writer.inBlock("struct \(typeName)") { writer in
             writeStrings(strings: collection, writer: &writer)
         }
     }
