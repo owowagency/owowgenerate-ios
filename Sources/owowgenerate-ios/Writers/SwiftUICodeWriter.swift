@@ -56,7 +56,12 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             }
             
             writer.addDocComment(key.comment)
-            writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            if isConstructingForLibrary {
+                writer.addLine("public static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            } else {
+                writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            }
+
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -65,10 +70,18 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
             writer.addDocComment(key.comment)
-            writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
-                writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
-                writer.addLine("let string = String(format: format, \(parameterUsage))")
-                writer.addLine("return Text(verbatim: string)")
+            if isConstructingForLibrary {
+                writer.inBlock("public static func \(memberName)(\(parameters)) -> Text") { writer in
+                    writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
+                    writer.addLine("let string = String(format: format, \(parameterUsage))")
+                    writer.addLine("return Text(verbatim: string)")
+                }
+            } else {
+                writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
+                    writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
+                    writer.addLine("let string = String(format: format, \(parameterUsage))")
+                    writer.addLine("return Text(verbatim: string)")
+                }
             }
             
             if key.placeholders.contains(.object) {
