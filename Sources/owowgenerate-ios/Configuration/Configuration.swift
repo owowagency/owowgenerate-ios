@@ -45,9 +45,9 @@ struct Configuration: Decodable {
 struct Task: Decodable {
     enum TaskType: String, Codable {
         case generateSwiftUIMapping
-        case generateSwiftUIMappingLibrary
+        case generateSwiftUIMappingPublic
         case generateNSLocalizedStringMapping
-        case generateNSLocalizedStringMappingLibrary
+        case generateNSLocalizedStringMappingPublic
         case rewriteTranslationFiles
         case generateInputXcFileList
         case generateOutputXcFileList
