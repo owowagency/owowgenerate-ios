@@ -22,7 +22,7 @@ struct Configuration: Decodable {
     var outputFiles: Set<String> {
         return Set(tasks.compactMap { task -> [String]? in
             switch task.type {
-            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping:
+            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping, .generateSwiftUIMappingPublic, .generateNSLocalizedStringMappingPublic:
                 return task.output.map { [$0] }
             case .rewriteTranslationFiles:
                 return Array(stringsFiles.suffix(from: 1))
@@ -45,7 +45,9 @@ struct Configuration: Decodable {
 struct Task: Decodable {
     enum TaskType: String, Codable {
         case generateSwiftUIMapping
+        case generateSwiftUIMappingPublic
         case generateNSLocalizedStringMapping
+        case generateNSLocalizedStringMappingPublic
         case rewriteTranslationFiles
         case generateInputXcFileList
         case generateOutputXcFileList

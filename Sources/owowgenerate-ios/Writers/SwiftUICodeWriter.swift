@@ -1,9 +1,19 @@
-func makeSwiftUICode(strings: StringsCollection) -> String {
+fileprivate var shouldBePublic = false
+fileprivate var isConstructingForLibrary = false
+
+func makeSwiftUICode(strings: StringsCollection, isForLibrary: Bool) -> String {
+    if isForLibrary {
+        isConstructingForLibrary = isForLibrary
+        shouldBePublic = false
+    }
+
     var writer = SwiftCodeWriter()
     writer.addLine("import SwiftUI")
     writer.addLine()
     
-    writer.inBlock("extension SwiftUI.Text") { writer in
+    let extensionText = (isConstructingForLibrary ? "public " : "") + "extension SwiftUI.Text"
+    
+    writer.inBlock(extensionText) { writer in
         writeStrings(strings: strings, writer: &writer)
     }
     
@@ -17,10 +27,20 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
-        writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
-        
-        writer.inBlock("struct \(typeName)") { writer in
-            writeStrings(strings: collection, writer: &writer)
+        if shouldBePublic && isConstructingForLibrary {
+            writer.addLine("public static var \(variableName): \(typeName).Type { \(typeName).self }")
+            
+            writer.inBlock("public struct \(typeName)") { writer in
+                writeStrings(strings: collection, writer: &writer)
+            }
+        } else {
+            shouldBePublic = true
+            writer.addLine("static var \(variableName): \(typeName).Type { \(typeName).self }")
+            
+            writer.inBlock("struct \(typeName)") { writer in
+                writeStrings(strings: collection, writer: &writer)
+            }
+            shouldBePublic = false
         }
     }
     
@@ -36,7 +56,10 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             }
             
             writer.addDocComment(key.comment)
-            writer.addLine("static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            
+            let line = (isConstructingForLibrary ? "public " : "") + "static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }"
+            
+            writer.addLine(line)
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -45,7 +68,10 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
             writer.addDocComment(key.comment)
-            writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
+            
+            let functionBlock = (isConstructingForLibrary ? "public " :"") + "static func \(memberName)(\(parameters)) -> Text"
+            
+            writer.inBlock(functionBlock) { writer in
                 writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
                 writer.addLine("let string = String(format: format, \(parameterUsage))")
                 writer.addLine("return Text(verbatim: string)")

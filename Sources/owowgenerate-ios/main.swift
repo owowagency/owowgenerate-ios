@@ -21,9 +21,13 @@ for task in config.tasks {
     
     switch task.type {
     case .generateSwiftUIMapping:
-        output = makeSwiftUICode(strings: strings)
+        output = makeSwiftUICode(strings: strings, isForLibrary: false)
+    case .generateSwiftUIMappingPublic:
+        output = makeSwiftUICode(strings: strings, isForLibrary: true)
     case .generateNSLocalizedStringMapping:
-        output = makeLocalizedStringCode(strings: strings)
+        output = makeLocalizedStringCode(strings: strings, isForLibrary: false)
+    case .generateNSLocalizedStringMappingPublic:
+        output = makeLocalizedStringCode(strings: strings, isForLibrary: true)
     case .rewriteTranslationFiles:
         try! rewriteTranslationFiles(paths: config.stringsFiles)
         continue
