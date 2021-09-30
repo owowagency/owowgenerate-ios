@@ -22,7 +22,7 @@ struct Configuration: Decodable {
     var outputFiles: Set<String> {
         return Set(tasks.compactMap { task -> [String]? in
             switch task.type {
-            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping, .generateSwiftUIMappingLibrary, .generateNSLocalizedStringMappingLibrary:
+            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping, .generateSwiftUIMappingPublic, .generateNSLocalizedStringMappingPublic:
                 return task.output.map { [$0] }
             case .rewriteTranslationFiles:
                 return Array(stringsFiles.suffix(from: 1))
