@@ -22,7 +22,7 @@ struct Configuration: Decodable {
     var outputFiles: Set<String> {
         return Set(tasks.compactMap { task -> [String]? in
             switch task.type {
-            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping, .generateSwiftUIMappingPublic, .generateNSLocalizedStringMappingPublic:
+            case .generateSwiftUIMapping, .generateNSLocalizedStringMapping:
                 return task.output.map { [$0] }
             case .rewriteTranslationFiles:
                 return Array(stringsFiles.suffix(from: 1))
@@ -45,9 +45,7 @@ struct Configuration: Decodable {
 struct Task: Decodable {
     enum TaskType: String, Codable {
         case generateSwiftUIMapping
-        case generateSwiftUIMappingPublic
         case generateNSLocalizedStringMapping
-        case generateNSLocalizedStringMappingPublic
         case rewriteTranslationFiles
         case generateInputXcFileList
         case generateOutputXcFileList
@@ -58,6 +56,9 @@ struct Task: Decodable {
     
     /// The output file of the task.
     var output: String?
+    
+    /// Options for the task.
+    var options: TaskOptions?
 }
 
 enum CaseStyle: String, Codable {
@@ -72,4 +73,12 @@ enum CaseStyle: String, Codable {
         case .snakeCase: return "_"
         }
     }
+}
+
+struct TaskOptions: Codable {
+    /// The access level modifier (`internal`, `public`, etc) to use for generated code in the task.
+    var accessLevel: String? = nil
+    
+    /// The `Bundle` to use in generated code. For example: `.module`, `Bundle(for: SomeClass.self)`,  `Bundle(identifier: ...)`
+    var bundle: String? = nil
 }

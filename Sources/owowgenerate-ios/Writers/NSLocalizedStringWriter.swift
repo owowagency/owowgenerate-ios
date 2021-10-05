@@ -1,36 +1,28 @@
-fileprivate var isConstructingForLibrary = false
-
-func makeLocalizedStringCode(strings: StringsCollection, isForLibrary: Bool) -> String {
-    if isForLibrary {
-        isConstructingForLibrary = isForLibrary
-    }
-    
+func makeLocalizedStringCode(strings: StringsCollection, accessLevel: String?, bundle: String?) -> String {
     var writer = SwiftCodeWriter()
     writer.addLine("import Foundation")
     writer.addLine()
     
-    let extensionText = (isConstructingForLibrary ? "public " : "") + "enum Strings"
+    let aclPrefix = accessLevel.map { $0 + " " } ?? ""
     
-    writer.inBlock(extensionText) { writer in
-        writeStrings(strings: strings, writer: &writer)
+    writer.inBlock(aclPrefix + "enum Strings") { writer in
+        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle)
     }
     
     return writer.output
 }
 
-private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter) {
+private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter, aclPrefix: String, bundle: String?) {
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true)).swiftIdentifier
         
-        let line = (isConstructingForLibrary ? "public " : "") + "static var \(variableName): \(typeName).Type { \(typeName).self }"
-        let structBlock = (isConstructingForLibrary ? "public " : "") + "struct \(typeName)"
+        writer.addLine(aclPrefix + "static var \(variableName): \(typeName).Type { \(typeName).self }")
         
-        writer.addLine(line)
-        writer.inBlock(structBlock) { writer in
-            writeStrings(strings: collection, writer: &writer)
+        writer.inBlock(aclPrefix + "struct \(typeName)") { writer in
+            writeStrings(strings: collection, writer: &writer, aclPrefix: aclPrefix, bundle: bundle)
         }
     }
     
@@ -38,11 +30,11 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
         writer.addDocComment(key.comment)
         
         let memberName = (key.key.split(separator: ".").last ?? "").camelCase(from: config.caseStyle, upper: false)
-        let getLocalizedString = "NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))"
-                
+        let bundleArgument = bundle.map { ", bundle: " + $0 } ?? ""
+        let getLocalizedString = "NSLocalizedString(\"\(key.key)\"\(bundleArgument), comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))"
+        
         if key.placeholders.isEmpty {
-            let line = (isConstructingForLibrary ? "public " : "") + "static var \(memberName): String { \(getLocalizedString) }"
-            writer.addLine(line)
+            writer.addLine(aclPrefix + "static var \(memberName): String { \(getLocalizedString) }")
         } else {
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
@@ -50,9 +42,7 @@ private func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWri
             
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
-            let functionBlock = (isConstructingForLibrary ? "public " : "") + "static func \(memberName)(\(parameters)) -> String"
-            
-            writer.inBlock(functionBlock) { writer in
+            writer.inBlock(aclPrefix + "static func \(memberName)(\(parameters)) -> String") { writer in
                 writer.addLine("let format = \(getLocalizedString)")
                 writer.addLine("return String(format: format, \(parameterUsage))")
             }
