@@ -5,7 +5,7 @@ func makeSwiftUICode(strings: StringsCollection, accessLevel: String?, bundle: S
     
     let aclPrefix = accessLevel.map { $0 + " " } ?? ""
     
-    writer.inBlock("extension SwiftUI.Text") { writer in
+    writer.inBlock("@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)\nextension SwiftUI.Text") { writer in
         writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle)
     }
     
