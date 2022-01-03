@@ -66,7 +66,7 @@ func rewriteTranslationFiles(paths: [String]) throws {
             case .unrecognized(let substring):
                 return l(substring, entry: nil)
             case .comment(let substring):
-                return l("/// \(substring)", entry: nil)
+                return l("// \(substring)", entry: nil)
             case .entry(let entry):
                 if let translatedEntry = file.strings[entry.key] {
                     return l("\"\(entry.key)\" = \(SwiftCodeWriter.makeStringLiteral(translatedEntry.value ?? ""));", entry: translatedEntry)
