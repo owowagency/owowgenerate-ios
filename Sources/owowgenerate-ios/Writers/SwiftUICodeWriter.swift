@@ -6,13 +6,21 @@ func makeSwiftUICode(strings: StringsCollection, accessLevel: String?, bundle: S
     let aclPrefix = accessLevel.map { $0 + " " } ?? ""
     
     writer.inBlock("@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)\nextension SwiftUI.Text") { writer in
-        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle)
+        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .text)
+    }
+    
+    writer.inBlock("@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)\nextension SwiftUI.LocalizedStringKey") { writer in
+        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .localizedStringKey)
     }
     
     return writer.output
 }
 
-fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter, aclPrefix: String, bundle: String?) {
+fileprivate enum WriteMode {
+    case text, localizedStringKey
+}
+
+fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter, aclPrefix: String, bundle: String?, mode: WriteMode) {
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
@@ -22,7 +30,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         writer.addLine(aclPrefix + "static var \(variableName): \(typeName).Type { \(typeName).self }")
         
         writer.inBlock(aclPrefix + "struct \(typeName)") { writer in
-            writeStrings(strings: collection, writer: &writer, aclPrefix: aclPrefix, bundle: bundle)
+            writeStrings(strings: collection, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: mode)
         }
     }
     
@@ -30,19 +38,25 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
         let memberName = (key.key.split(separator: ".").last ?? "").camelCase(from: config.caseStyle, upper: false)
         
         if key.placeholders.isEmpty {
-            var additionalArguments = ""
-            
-            if let bundle = bundle {
-                additionalArguments += ", bundle: \(bundle)"
-            }
-            
-            if !key.comment.isEmpty {
-                additionalArguments += ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
-            }
-            
             writer.addDocComment(key.comment)
-            writer.addLine(aclPrefix + "static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
-        } else {
+            
+            switch mode {
+            case .text:
+                var additionalArguments = ""
+                
+                if let bundle = bundle {
+                    additionalArguments += ", bundle: \(bundle)"
+                }
+                
+                if !key.comment.isEmpty {
+                    additionalArguments += ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
+                }
+                
+                writer.addLine(aclPrefix + "static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+            case .localizedStringKey:
+                writer.addLine(aclPrefix + "static var \(memberName): LocalizedStringKey { LocalizedStringKey(\"\(key.key)\") }")
+            }
+        } else if mode == .text { // TODO: Support placeholders with LocalizedStringKey
             let parameters = key.placeholders.enumerated().map { index, type in
                 "_ placeholder\(index): \(type.rawValue)"
             }.joined(separator: ", ")
