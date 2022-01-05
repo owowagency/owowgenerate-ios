@@ -6,11 +6,11 @@ func makeSwiftUICode(strings: StringsCollection, accessLevel: String?, bundle: S
     let aclPrefix = accessLevel.map { $0 + " " } ?? ""
     
     writer.inBlock("@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)\nextension SwiftUI.Text") { writer in
-        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .text)
+        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .text, static: true)
     }
     
     writer.inBlock("@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)\nextension SwiftUI.LocalizedStringKey") { writer in
-        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .localizedStringKey)
+        writeStrings(strings: strings, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: .localizedStringKey, static: true)
     }
     
     return writer.output
@@ -20,17 +20,22 @@ fileprivate enum WriteMode {
     case text, localizedStringKey
 }
 
-fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter, aclPrefix: String, bundle: String?, mode: WriteMode) {
+fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCodeWriter, aclPrefix: String, bundle: String?, mode: WriteMode, static: Bool) {
+    var aclStaticPrefix = aclPrefix
+    if `static` {
+        aclStaticPrefix += "static "
+    }
+    
     for (name, collection) in strings.subCollections.sorted(by: { $0.key < $1.key }) {
         writer.addLine()
         
         let variableName = name.camelCase(from: config.caseStyle, upper: false).swiftIdentifier
         let typeName = (name.camelCase(from: config.caseStyle, upper: true) + "StringsNamespace").swiftIdentifier
         
-        writer.addLine(aclPrefix + "static var \(variableName): \(typeName).Type { \(typeName).self }")
+        writer.addLine(aclStaticPrefix + "var \(variableName): \(typeName) { \(typeName)() }")
         
         writer.inBlock(aclPrefix + "struct \(typeName)") { writer in
-            writeStrings(strings: collection, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: mode)
+            writeStrings(strings: collection, writer: &writer, aclPrefix: aclPrefix, bundle: bundle, mode: mode, static: false)
         }
     }
     
@@ -52,9 +57,9 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
                     additionalArguments += ", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment))"
                 }
                 
-                writer.addLine(aclPrefix + "static var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
+                writer.addLine(aclStaticPrefix + "var \(memberName): Text { Text(\"\(key.key)\"\(additionalArguments)) }")
             case .localizedStringKey:
-                writer.addLine(aclPrefix + "static var \(memberName): LocalizedStringKey { LocalizedStringKey(\"\(key.key)\") }")
+                writer.addLine(aclStaticPrefix + "var \(memberName): LocalizedStringKey { LocalizedStringKey(\"\(key.key)\") }")
             }
         } else if mode == .text { // TODO: Support placeholders with LocalizedStringKey
             let parameters = key.placeholders.enumerated().map { index, type in
@@ -64,7 +69,7 @@ fileprivate func writeStrings(strings: StringsCollection, writer: inout SwiftCod
             let parameterUsage = key.placeholders.indices.map { "placeholder\($0)" }.joined(separator: ", ")
             
             writer.addDocComment(key.comment)
-            writer.inBlock(aclPrefix + "static func \(memberName)(\(parameters)) -> Text") { writer in
+            writer.inBlock(aclStaticPrefix + "func \(memberName)(\(parameters)) -> Text") { writer in
                 writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
                 writer.addLine("let string = String(format: format, \(parameterUsage))")
                 writer.addLine("return Text(verbatim: string)")
