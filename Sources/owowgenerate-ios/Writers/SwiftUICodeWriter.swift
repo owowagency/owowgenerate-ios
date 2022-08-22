@@ -112,7 +112,7 @@ fileprivate func writeTextConcatenationFunction(writer: inout SwiftCodeWriter, k
     }
     
     writer.addDocComment(key.comment)
-    writer.inBlock("static func \(memberName)(\(parameters)) -> Text") { writer in
+    writer.inBlock("func \(memberName)(\(parameters)) -> Text") { writer in
         writer.addLine("let format = NSLocalizedString(\"\(key.key)\", comment: \(SwiftCodeWriter.makeStringLiteral(key.comment)))")
         writer.addLine("let temporaryString = String(format: format, \(parameterUsage))")
         
